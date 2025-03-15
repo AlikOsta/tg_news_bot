@@ -195,6 +195,7 @@ async def main():
     # Регистрируем обработчик для новых сообщений
     @client.on(events.NewMessage(chats=source_entities))
     async def handle_new_message(event):
+        media_path = None
         try:
             # Получаем информацию об источнике
             if isinstance(event.chat, User):
@@ -207,34 +208,40 @@ async def main():
             content, media_path, source_info = await process_message(event.message)
             if content:
                 logger.info(f"Сообщение ID: {event.message.id} готово к отправке в целевую группу")
-                # Отправка в целевую группу
-                if media_path:
-                    logger.info(f"Отправка сообщения ID: {event.message.id} с медиа в целевую группу")
-                    # Отправляем с поддержкой Markdown
-                    await client.send_file(
-                        target_entity, 
-                        media_path, 
-                        caption=content,
-                        parse_mode='md'  # Включаем поддержку Markdown
-                    )
-                    # Очистка загруженного файла
-                    if os.path.exists(media_path):
-                        os.remove(media_path)
-                        logger.info(f"Медиа-файл {media_path} удален после отправки")
-                else:
-                    logger.info(f"Отправка текстового сообщения ID: {event.message.id} в целевую группу")
-                    # Отправляем с поддержкой Markdown
-                    await client.send_message(
-                        target_entity, 
-                        content,
-                        parse_mode='md'  # Включаем поддержку Markdown
-                    )
-                
-                logger.info(f"Успешно обработано и переслано сообщение ID: {event.message.id} из {source_info}")
+                try:
+                    # Отправка в целевую группу
+                    if media_path:
+                        logger.info(f"Отправка сообщения ID: {event.message.id} с медиа в целевую группу")
+                        # Отправляем с поддержкой Markdown
+                        await client.send_file(
+                            target_entity, 
+                            media_path, 
+                            caption=content,
+                            parse_mode='md'  # Включаем поддержку Markdown
+                        )
+                        logger.info(f"Сообщение ID: {event.message.id} с медиа успешно отправлено")
+                    else:
+                        logger.info(f"Отправка текстового сообщения ID: {event.message.id} в целевую группу")
+                        # Отправляем с поддержкой Markdown
+                        await client.send_message(
+                            target_entity, 
+                            content,
+                            parse_mode='md'  # Включаем поддержку Markdown
+                        )
+                        logger.info(f"Текстовое сообщение ID: {event.message.id} успешно отправлено")
+                    
+                    logger.info(f"Успешно обработано и переслано сообщение ID: {event.message.id} из {source_info}")
+                except Exception as e:
+                    logger.error(f"Ошибка при отправке сообщения ID: {event.message.id}: {e}")
             else:
                 logger.info(f"Сообщение ID: {event.message.id} не прошло обработку и не будет отправлено")
         except Exception as e:
             logger.error(f"Ошибка при обработке сообщения ID: {event.message.id}: {e}")
+        finally:
+            # Очистка загруженного файла в любом случае
+            if media_path and os.path.exists(media_path):
+                os.remove(media_path)
+                logger.info(f"Медиа-файл {media_path} удален")
     
     logger.info("Бот запущен и ожидает новые сообщения...")
     # Запуск клиента до отключения

@@ -1,0 +1,12 @@
+# Основные зависимости
+telethon>=1.28.0
+python-dotenv>=1.0.0
+mistralai>=0.0.7
+
+# Стандартные библиотеки Python, которые не требуют установки
+# asyncio
+# logging
+# os
+# collections
+# random
+# time

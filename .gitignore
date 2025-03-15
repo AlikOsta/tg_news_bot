@@ -6,3 +6,5 @@ __pycache__
 temp_media/
 argentina_news_bot.session
 argentina_news_bot.session-journal
+test_session.session
+test_log.txt
