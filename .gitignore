@@ -1,0 +1,7 @@
+.env
+node_modules/
+venv
+bot_log.txt
+__pycache__
+temp_media/
+argentina_news_bot.session
