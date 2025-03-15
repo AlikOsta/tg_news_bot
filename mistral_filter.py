@@ -22,13 +22,13 @@ async def filter_argentina_content(text, max_retries=3, initial_delay=2):
             logger.info(f"Попытка фильтрации #{retry_count+1}")
             client = Mistral(api_key=os.getenv('MISTRAL_API_KEY_FILTER'))
             
-            prompt = f"""Оцени, связан ли следующий текст с Аргентиной или темами, имеющими прямое отношение к Аргентине 
-            (например, аргентинская политика, экономика, культура, спорт, иммиграция в Аргентину, жизнь в Аргентине и т.д.).
+            # Получаем промпт из .env и форматируем его с текстом
+            prompt_template = os.getenv('FILTER_PROMPT')
+            prompt = prompt_template.format(text=text)
             
-            Ответь только "ДА" если текст связан с Аргентиной, или "НЕТ" если не связан.
-            
-            Текст для анализа: {text}
-            """
+            # Получаем модель и максимальное количество токенов из .env
+            model = os.getenv('FILTER_MODEL', 'mistral-large-latest')
+            max_tokens = int(os.getenv('FILTER_MAX_TOKENS', 10))
             
             # Run in an executor to avoid blocking
             loop = asyncio.get_event_loop()
@@ -36,9 +36,9 @@ async def filter_argentina_content(text, max_retries=3, initial_delay=2):
             response = await loop.run_in_executor(
                 None,
                 lambda: client.chat.complete(
-                    model="mistral-large-latest",
+                    model=model,
                     messages=[{"role": "user", "content": prompt}],
-                    max_tokens=10
+                    max_tokens=max_tokens
                 )
             )
             

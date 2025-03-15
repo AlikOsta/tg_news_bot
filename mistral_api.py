@@ -34,29 +34,19 @@ async def process_content_with_mistral(title, article_content, max_retries=3, in
                 logger.info("Инициализация клиента Mistral API")
                 client = Mistral(api_key=os.getenv('MISTRAL_API_KEY'))
                 
-                prompt = f"""Представь, что ты опытный новостной редактор. Твоя задача – на основе предоставленной статьи создать краткую, но информативную версию (до 1000 символов) на русском языке. 
-                Текст должен быть четким, интересным и передавать суть оригинальной статьи.
-
-        Требования:
-        Добавь к тексту заголовок статьи.
-        Сохрани ключевые факты и основную мысль.
-        Перевести текст на русский язык.
-        Убери лишние детали, делая текст лаконичным.
-        Текс сатьи не должен содержать какой-либо рекламы на сервисы, продукты, аккаунты или людей.
-        НЕ ИСПОЬЗУЙ ссылки на сайты или другие статьи.(ВАЖНО!!!)
-        Длина итогового текста не должна превышать 800 символов.(ВАЖНО!!!)
-        В СТАТЬЕ НЕ ДОЛЖНО БЫТЬ ССЫЛОК на источник.
-
-        Исходная статья:
-        Заголовок: {title}
-        Текст статьи: {article_content}
-                """
+                # Получаем промпт из .env и форматируем его с заголовком и содержанием
+                prompt_template = os.getenv('CONTENT_PROMPT')
+                prompt = prompt_template.format(title=title, article_content=article_content)
+                
+                # Получаем модель и максимальное количество токенов из .env
+                model = os.getenv('CONTENT_MODEL', 'mistral-large-latest')
+                max_tokens = int(os.getenv('CONTENT_MAX_TOKENS', 800))
                 
                 logger.info("Отправка запроса к Mistral API для обработки контента")
                 chat_response = client.chat.complete(
-                    model="mistral-large-latest",
+                    model=model,
                     messages=[{"role": "user", "content": prompt}],
-                    max_tokens=800
+                    max_tokens=max_tokens
                 )
                 
                 logger.info("Получен ответ от Mistral API")
