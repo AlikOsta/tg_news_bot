@@ -109,9 +109,12 @@ async def process_message(message):
         logger.info(f"Сообщение ID: {message.id} добавлено в список обработанных")
         
         # Форматируем контент с использованием Markdown
-        # Ищем заголовок в первой строке и делаем его полужирным
         lines = processed_content.split('\n')
         if lines and lines[0]:
+            # Удаляем символы ### из заголовка, если они есть
+            if lines[0].startswith('###'):
+                lines[0] = lines[0].replace('###', '').strip()
+            
             # Проверяем, не содержит ли первая строка уже форматирование жирным шрифтом
             if not (lines[0].startswith('**') and lines[0].endswith('**')):
                 lines[0] = f"**{lines[0]}**"

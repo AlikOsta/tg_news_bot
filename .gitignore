@@ -5,3 +5,4 @@ bot_log.txt
 __pycache__
 temp_media/
 argentina_news_bot.session
+argentina_news_bot.session-journal
